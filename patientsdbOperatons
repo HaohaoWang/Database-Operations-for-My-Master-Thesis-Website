@@ -1,0 +1,184 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data.SqlClient;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web.Script.Serialization;
+
+
+    /// <summary>
+    /// Summary description for dbOperatons
+    /// </summary>
+    public class patientsdbOperatons 
+    {
+        DataTable dataTable = new DataTable();
+
+        public static  String sqlConnstr()
+        {
+            String connStr = ConfigurationManager.ConnectionStrings["mydatabaseConnectionString"].ToString();
+            return connStr;
+        }
+
+        public patientsdbOperatons()
+        {
+        }
+
+        public String selectPatientcaseJson(string pid)
+        {
+            SqlConnection sqlCon = new SqlConnection(sqlConnstr());
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            Dictionary<String, String> dic = new Dictionary<String, String>();
+            String json = "";
+            try
+            {
+                sqlCon.Open();
+                string sql = "select * from patients where pid = '" + pid + "'";
+                cmd = new SqlCommand(sql, sqlCon);
+                //reader = cmd.ExecuteReader();
+                reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                while (reader.Read())
+                {
+                    
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        dic.Add(reader.GetName(i), reader.GetValue(i).ToString().Trim());         
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                sqlCon.Dispose();
+                cmd.Dispose();
+                reader.Close();
+                reader.Dispose();
+            }
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            json = js.Serialize(dic);
+            return json;
+        }
+
+        public List<string> selectPatientcase(string pid)
+        {
+            List<string> list = new List<string>();
+            SqlConnection sqlCon = new SqlConnection(sqlConnstr());
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            try
+            {
+                sqlCon.Open();
+                string sql = "select * from patients where pid = '" + pid + "'";
+                cmd = new SqlCommand(sql, sqlCon);
+                //reader = cmd.ExecuteReader();
+                reader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                while (reader.Read())
+                {
+                    
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        list.Add(reader.GetValue(i).ToString().Trim());
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                sqlCon.Dispose();
+                cmd.Dispose();
+                reader.Close();
+                reader.Dispose();
+            }
+            return list;
+        }
+        public bool deletePatientcase(string pid)
+        {
+            SqlConnection sqlCon = new SqlConnection(sqlConnstr());
+            SqlCommand sqlCmd = null;
+            try
+            {
+                sqlCon.Open();
+                string sqlQuery = "delete from patients where pid = '" + pid + "'";
+                sqlCmd = new SqlCommand(sqlQuery, sqlCon);
+                sqlCmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                sqlCon.Dispose();
+                sqlCmd.Dispose();
+            }
+        }
+
+        //public List<Hashtable> selectPatientcasehash(string pid)
+        //{
+        //    List<Hashtable> list = new List<Hashtable>();
+        //    list.Clear();
+        //    try
+        //    {
+        //        string sql = "select * from mytable where pid = '" + pid + "'";
+        //        SqlCommand cmd = new SqlCommand(sql, sqlCon);
+        //        SqlDataReader reader = cmd.ExecuteReader();
+        //        Hashtable myHashtable = new Hashtable();
+        //        while (reader.Read())
+        //        {
+        //             
+        //            for (int i = 0; i < reader.FieldCount; i++)
+        //            {
+        //                myHashtable.Add(reader.GetName(i), reader.GetValue(i));
+        //            }
+        //        }
+
+        //        reader.Close();
+        //        cmd.Dispose();
+
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //    }
+        //    return list;
+        //}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+       
+
+        public bool updateItem(string id, string name, string age)
+        {
+            SqlConnection sqlCon = new SqlConnection(sqlConnstr());
+            SqlCommand sqlCmd = null;
+            try
+            {
+                sqlCon.Open();
+                string sqlQuery = "update mytable set name = '" + name + "', age= '" + age + "'  where id = '" + id + "'";
+                sqlCmd = new SqlCommand(sqlQuery, sqlCon);
+                sqlCmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                sqlCon.Dispose();
+                sqlCmd.Dispose();           
+            }
+        }
+
+       
+}
